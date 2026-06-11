@@ -1,6 +1,6 @@
-# Eventuri-MAKCU-LatencyScope
+# CVM-LatencyScope
 
-Eventuri-MAKCU LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
+CVM LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
 
 ## Overview
 
