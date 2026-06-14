@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 # cvm-LatencyScope
 
 cvm-LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
+=======
+# CVM-LatencyScope
+
+CVM LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
+>>>>>>> d3c5411a196cdb961d94da5bc0f8530451ee05ea
 
 ## Overview
 
