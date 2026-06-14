@@ -62,7 +62,12 @@ from ui.debug_window import DebugWindowManager
 from utils.color_detector import ColorDetector
 from utils.click_controller import ClickController
 from utils.config_manager import ConfigManager
-from capture.CaptureCard import create_capture_card_camera, CaptureCardCamera
+from capture.CaptureCard import (
+    create_capture_card_camera,
+    CaptureCardCamera,
+    SUPPORTED_CAPTURE_FORMATS,
+    list_dshow_capture_devices,
+)
 from ui.language_manager import get_language_manager, t
 
 # 嘗試導入可選的擷取庫
@@ -457,6 +462,7 @@ class MainWindow(QMainWindow):
         
         # 設置 UI
         self.setup_ui()
+        self.refresh_capture_devices()
         
         # 從配置載入設置
         self.load_settings_from_config()
@@ -765,8 +771,13 @@ class MainWindow(QMainWindow):
         capture_card_layout = QFormLayout()
         capture_card_layout.setSpacing(8)
         
-        self.capture_device_index_input = QSpinBox()
-        self.capture_device_index_input.setRange(0, 10)
+        self.capture_device_input = QComboBox()
+        self.capture_device_input.setMinimumWidth(260)
+        self.capture_device_refresh_btn = QPushButton(t("refresh_devices", "Refresh Devices"))
+        self.capture_device_refresh_btn.clicked.connect(self.refresh_capture_devices)
+        capture_device_layout = QHBoxLayout()
+        capture_device_layout.addWidget(self.capture_device_input, 1)
+        capture_device_layout.addWidget(self.capture_device_refresh_btn)
         self.capture_width_input = QSpinBox()
         self.capture_width_input.setRange(320, 7680)
         self.capture_height_input = QSpinBox()
@@ -781,8 +792,14 @@ class MainWindow(QMainWindow):
         self.capture_offset_x_input.setRange(-3840, 3840)
         self.capture_offset_y_input = QSpinBox()
         self.capture_offset_y_input.setRange(-2160, 2160)
+        self.capture_format_input = QComboBox()
+        for capture_format in SUPPORTED_CAPTURE_FORMATS:
+            self.capture_format_input.addItem(capture_format, capture_format)
         
-        capture_card_layout.addRow(t("device_index", "設備索引") + ":", self.capture_device_index_input)
+        self.capture_device_label = QLabel(t("device_name", "設備"))
+        self.capture_format_label = QLabel(t("capture_format", "格式"))
+        capture_card_layout.addRow(self.capture_device_label.text() + ":", capture_device_layout)
+        capture_card_layout.addRow(self.capture_format_label.text() + ":", self.capture_format_input)
         capture_card_layout.addRow(t("width", "寬度") + ":", self.capture_width_input)
         capture_card_layout.addRow(t("height", "高度") + ":", self.capture_height_input)
         capture_card_layout.addRow(t("fps", "FPS") + ":", self.capture_fps_input)
@@ -1397,6 +1414,30 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.log_text)
         
         return panel
+
+    def refresh_capture_devices(self):
+        devices = list_dshow_capture_devices()
+        current_index = self.get_selected_capture_device_index()
+        self.capture_device_input.blockSignals(True)
+        self.capture_device_input.clear()
+        for device in devices:
+            label = f'{device["index"]}: {device["name"]}'
+            self.capture_device_input.addItem(label, device["index"])
+        if self.capture_device_input.count() == 0:
+            self.capture_device_input.addItem(t("no_capture_devices", "No DShow capture devices found"), 0)
+        self.set_capture_device_selection(current_index)
+        self.capture_device_input.blockSignals(False)
+
+    def set_capture_device_selection(self, device_index):
+        index = self.capture_device_input.findData(int(device_index))
+        if index >= 0:
+            self.capture_device_input.setCurrentIndex(index)
+        elif self.capture_device_input.count() > 0:
+            self.capture_device_input.setCurrentIndex(0)
+
+    def get_selected_capture_device_index(self):
+        data = self.capture_device_input.currentData()
+        return int(data) if data is not None else 0
     
     def load_settings_from_config(self):
         """從配置檔案載入設置"""
@@ -1438,7 +1479,11 @@ class MainWindow(QMainWindow):
             self.srt_listener_mode_checkbox.setChecked(self.config_manager.get("srt_listener_mode", False))
         
         # 載入Capture Card設置
-        self.capture_device_index_input.setValue(self.config_manager.get("capture_device_index", 0))
+        self.set_capture_device_selection(self.config_manager.get("capture_device_index", 0))
+        capture_format = self.config_manager.get("capture_format", "MJPG")
+        format_index = self.capture_format_input.findData(capture_format)
+        if format_index >= 0:
+            self.capture_format_input.setCurrentIndex(format_index)
         self.capture_width_input.setValue(self.config_manager.get("capture_width", 1920))
         self.capture_height_input.setValue(self.config_manager.get("capture_height", 1080))
         self.capture_fps_input.setValue(self.config_manager.get("capture_fps", 240))
@@ -1720,7 +1765,10 @@ class MainWindow(QMainWindow):
             "srt_port": self.srt_port_input.value() if hasattr(self, 'srt_port_input') else 1234,
             "srt_fps": self.srt_fps_input.value() if hasattr(self, 'srt_fps_input') else 60,
             "srt_listener_mode": self.srt_listener_mode_checkbox.isChecked() if hasattr(self, 'srt_listener_mode_checkbox') else False,
-            "capture_device_index": self.capture_device_index_input.value(),
+            "capture_device_index": self.get_selected_capture_device_index(),
+            "capture_format": self.capture_format_input.currentData(),
+            "capture_buffer_mb": 64,
+            "capture_fourcc_preference": [self.capture_format_input.currentData()],
             "capture_width": self.capture_width_input.value(),
             "capture_height": self.capture_height_input.value(),
             "capture_fps": self.capture_fps_input.value(),
@@ -1794,7 +1842,7 @@ class MainWindow(QMainWindow):
     
     def update_window_title(self):
         """更新窗口標題"""
-        base_title = t("window_title", "顏色檢測自動點擊程式 v1.2")
+        base_title = t("window_title", "cvm-LatencyScope")
         self.setWindowTitle(f"{base_title}  -  made by asenyeroao")
     
     def update_ui_texts(self):
@@ -1810,6 +1858,12 @@ class MainWindow(QMainWindow):
             self.udp_settings_group.setTitle(t("udp_settings", "UDP 設置"))
         if hasattr(self, 'capture_card_settings_group'):
             self.capture_card_settings_group.setTitle(t("capture_card_settings", "Capture Card 設置"))
+        if hasattr(self, 'capture_device_label'):
+            self.capture_device_label.setText(t("device_name", "設備"))
+        if hasattr(self, 'capture_format_label'):
+            self.capture_format_label.setText(t("capture_format", "格式"))
+        if hasattr(self, 'capture_device_refresh_btn'):
+            self.capture_device_refresh_btn.setText(t("refresh_devices", "Refresh Devices"))
         if hasattr(self, 'mss_settings_group'):
             self.mss_settings_group.setTitle(t("mss_settings", "MSS 設置"))
         if hasattr(self, 'bettercam_settings_group'):
@@ -2122,7 +2176,10 @@ class MainWindow(QMainWindow):
                 self.log(t("connecting_capture_card", "正在連接 Capture Card..."))
                 try:
                     # 更新config對象
-                    self.config_manager.set("capture_device_index", self.capture_device_index_input.value())
+                    self.config_manager.set("capture_device_index", self.get_selected_capture_device_index())
+                    self.config_manager.set("capture_format", self.capture_format_input.currentData())
+                    self.config_manager.set("capture_buffer_mb", 64)
+                    self.config_manager.set("capture_fourcc_preference", [self.capture_format_input.currentData()])
                     self.config_manager.set("capture_width", self.capture_width_input.value())
                     self.config_manager.set("capture_height", self.capture_height_input.value())
                     self.config_manager.set("capture_fps", self.capture_fps_input.value())
@@ -2136,6 +2193,7 @@ class MainWindow(QMainWindow):
                         pass
                     temp_config = TempConfig()
                     for key in ["capture_device_index", "capture_width", "capture_height", "capture_fps",
+                               "capture_format", "capture_buffer_mb", "capture_fourcc_preference",
                                "capture_range_x", "capture_range_y", "capture_offset_x", "capture_offset_y",
                                "region_size"]:
                         setattr(temp_config, key, self.config_manager.get(key, 0))
@@ -2157,7 +2215,7 @@ class MainWindow(QMainWindow):
                     self._start_capture_card_thread()
                 except Exception as e:
                     log_exception(e, context="Capture Card 連接", additional_info={
-                        "設備索引": self.capture_device_index_input.value(),
+                        "設備索引": self.get_selected_capture_device_index(),
                         "寬度": self.capture_width_input.value(),
                         "高度": self.capture_height_input.value(),
                         "FPS": self.capture_fps_input.value()

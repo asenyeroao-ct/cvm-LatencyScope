@@ -1,6 +1,6 @@
 {
     "_language_name": "English (English)",
-    "window_title": "Color Detection Auto Clicker v1.2",
+    "window_title": "cvm-LatencyScope",
     "capture_mode": "Capture Mode",
     "udp": "UDP",
     "tcp": "TCP",
@@ -28,6 +28,10 @@
     "not_connected": "Not Connected",
     "capture_card_settings": "Capture Card Settings",
     "device_index": "Device Index",
+    "device_name": "Device",
+    "capture_format": "Format",
+    "refresh_devices": "Refresh Devices",
+    "no_capture_devices": "No DShow capture devices found",
     "width": "Width",
     "height": "Height",
     "fps": "FPS",

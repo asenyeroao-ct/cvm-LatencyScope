@@ -27,7 +27,9 @@ DEFAULT_CONFIG = {
     "capture_height": 1080,
     "capture_fps": 240,
     "capture_device_index": 0,
-    "capture_fourcc_preference": ["NV12", "YUY2", "MJPG"],
+    "capture_format": "MJPG",
+    "capture_buffer_mb": 64,
+    "capture_fourcc_preference": ["MJPG"],
     "capture_range_x": 0,
     "capture_range_y": 0,
     "capture_offset_x": 0,
@@ -131,4 +133,3 @@ class ConfigManager:
     def get_all(self) -> Dict[str, Any]:
         """獲取所有配置"""
         return self.config.copy()
-

@@ -1,20 +1,20 @@
 {
-    "capture_mode": "udp",
+    "capture_mode": "capture_card",
     "bettercam_mode": "cpu",
     "udp_ip": "192.168.5.24",
-    "udp_port": 1314,
+    "udp_port": 1312,
     "target_fps": 240,
     "capture_width": 1920,
     "capture_height": 1080,
     "capture_fps": 240,
     "capture_device_index": 0,
+    "capture_format": "NV12",
+    "capture_buffer_mb": 64,
     "capture_fourcc_preference": [
-        "NV12",
-        "YUY2",
-        "MJPG"
+        "NV12"
     ],
-    "capture_range_x": 200,
-    "capture_range_y": 200,
+    "capture_range_x": 144,
+    "capture_range_y": 144,
     "capture_offset_x": 0,
     "capture_offset_y": 0,
     "detection_mode": 2,

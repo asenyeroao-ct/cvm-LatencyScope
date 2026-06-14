@@ -1,6 +1,6 @@
 {
     "_language_name": "Chinese Traditional (繁體中文)",
-    "window_title": "顏色檢測自動點擊程式 v1.2",
+    "window_title": "cvm-LatencyScope",
     "capture_mode": "擷取模式",
     "udp": "UDP",
     "tcp": "TCP",
@@ -28,6 +28,10 @@
     "not_connected": "未連接",
     "capture_card_settings": "Capture Card 設置",
     "device_index": "設備索引",
+    "device_name": "設備",
+    "capture_format": "格式",
+    "refresh_devices": "重新整理設備",
+    "no_capture_devices": "找不到 DShow 擷取設備",
     "width": "寬度",
     "height": "高度",
     "fps": "FPS",

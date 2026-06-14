@@ -1,6 +1,6 @@
-# Eventuri-MAKCU-LatencyScope
+# cvm-LatencyScope
 
-Eventuri-MAKCU LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
+cvm-LatencyScope measures end-to-end 2PC capture latency across OBS UDP, TCP, SRT, NDI and capture cards. It watches incoming frames for a configurable color marker, then triggers MAKCU left-click so you can benchmark and compare real input-to-action delay.
 
 ## Overview
 
@@ -48,8 +48,8 @@ LatencyScope is a high-performance latency measurement tool designed for two-PC 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/Eventuri-MAKCU-LatencyScope.git
-cd Eventuri-MAKCU-LatencyScope
+git clone https://github.com/yourusername/cvm-LatencyScope.git
+cd cvm-LatencyScope
 ```
 
 ### 2. Run Setup Script
@@ -292,4 +292,3 @@ For full license terms, please see the [LICENSE](LICENSE) file.
 ## Support
 
 For issues and questions, please open an issue on the GitHub repository.
-
